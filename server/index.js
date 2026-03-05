@@ -24,16 +24,29 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Root route to prevent 404
+app.get('/', (req, res) => {
+  res.send('LMS API is running');
+});
+
 async function start() {
   try {
     await initializeDatabase();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    if (process.env.NODE_ENV !== 'production') {
+      app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+      });
+    }
   } catch (err) {
     console.error('Failed to start server:', err);
-    process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 }
 
-start();
+if (require.main === module) {
+  start();
+}
+
+module.exports = app;
